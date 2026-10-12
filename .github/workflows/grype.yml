@@ -29,6 +29,7 @@ jobs:
       - name: Grype scan (${{ matrix.project }})
         run: |
           grype dir:${{ matrix.project }} \
+            --by-cve \
             -o table \
             -o json=grype-${{ matrix.project }}.json
 
