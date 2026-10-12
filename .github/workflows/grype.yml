@@ -1,0 +1,40 @@
+name: Grype SCA
+
+on:
+  pull_request:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  grype:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [medusa, storefront]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar Grype
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh \
+            | sh -s -- -b /usr/local/bin
+          grype version
+
+      - name: Grype scan (${{ matrix.project }})
+        run: |
+          grype dir:${{ matrix.project }} \
+            -o table \
+            -o json=grype-${{ matrix.project }}.json
+
+      - name: Upload relatório
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: grype-${{ matrix.project }}
+          path: grype-${{ matrix.project }}.json
