@@ -1,0 +1,22 @@
+name: Verify TLS
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  testssl:
+    runs-on: ubuntu-latest
+    container:
+      image: drwetter/testssl.sh:3.2
+    steps:
+      - name: Run testssl.sh
+        run: testssl.sh --severity HIGH --jsonfile /data --csvfile /data https://seu-dominio.com.br
+
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: testssl-reports
+          path: /data/*   
